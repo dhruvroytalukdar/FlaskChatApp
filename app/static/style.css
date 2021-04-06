@@ -1,0 +1,9 @@
+.hide-class{
+    display: none;
+}
+
+#message-container{
+    min-height: 83vh;
+    overflow: auto;
+    max-height: 83vh;
+}

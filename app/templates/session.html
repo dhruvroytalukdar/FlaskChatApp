@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+    <title>Chat App</title>
+</head>
+<body>
+
+    <div id="login-form">
+        <form id="form" action="/" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+            <label for="roomcode">Room ID:</label>
+            <input type="text" id="roomcode" name="roomid" required />
+            <input id="submit-button" type="submit" value="Submit">
+        </form>
+        <button id="create-room">Create a new room</button>
+    </div>
+
+    <div id="message-section" class="hide-class">
+        <h1 id="greetings"></h1>
+        <button id="leave-room">Leave</button>
+        <div id="message-container">No Messages yet..</div>
+        <form id="message-form" style="margin-top: 15px;">
+            <input type="text" id="message" name="message" required>
+            <input type="submit" value="submit">
+        </form>
+    </div>
+    
+    <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='index.js') }}"></script>
+</body>
+</html>
