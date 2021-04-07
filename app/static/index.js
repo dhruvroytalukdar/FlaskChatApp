@@ -1,4 +1,4 @@
-var socketio = io.connect('http://localhost:8080');
+var socketio = io.connect('https://chatwithsenderly.herokuapp.com/');
 
 const form = document.getElementById('form');
 var username = undefined;
