@@ -1,4 +1,4 @@
-var socketio = io.connect('');
+var socketio = io.connect();
 
 const form = document.getElementById('form');
 var username = undefined;
