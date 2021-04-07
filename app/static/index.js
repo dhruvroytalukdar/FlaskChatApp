@@ -1,4 +1,4 @@
-var socketio = io.connect('https://chatwithsenderly.herokuapp.com/');
+var socketio = io.connect('');
 
 const form = document.getElementById('form');
 var username = undefined;
@@ -134,6 +134,7 @@ const handleDeleteFunction = (e) => {
 // Remove message from he html page
 socketio.on("remove-message",json => {
     var div = document.getElementById(json["id"])
+    console.log(div);
     container.removeChild(div);
 })
 
