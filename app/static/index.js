@@ -5,6 +5,8 @@ var username = undefined;
 var roomcode = undefined;
 const container = document.getElementById('message-container');
 const member_count_id = document.getElementById("member_count_id");
+const listofmembers = document.getElementById('listofmembers');
+
 
 // When you have room code
 form.onsubmit = (e) => {
@@ -26,6 +28,7 @@ form.onsubmit = (e) => {
         console.log(json['user'],"special "+room);
         if(json['user']==user){
             if(json['present']){
+
                 socketio.emit('join',{
                     username:user,
                     roomcode:room
@@ -89,16 +92,28 @@ message_form.onsubmit = e => {
 
 // Recieve message from server
 socketio.on('display-client',(data) => {
+    
     if(container.innerHTML == 'No Messages yet..')
         container.innerHTML = "";
+    
     if(roomcode == undefined){
         roomcode = data.roomcode;
         document.getElementById("greetings").innerHTML = `Welcome ${username} to chat room ${roomcode}!!`;
     }
     
-    // Check if the data has members properties
+    // Check if the data has members properties to update members
     if(data.hasOwnProperty('members')){
         member_count_id.innerHTML = data['members'].toString();
+    }
+
+    if(data.hasOwnProperty('memberlist')){
+        listofmembers.innerHTML = "";
+        for(var i=0;i<data['memberlist'].length;i++){
+            var li = document.createElement("li");
+            li.innerHTML = `<strong>${data["memberlist"][i]}</strong>`;
+            listofmembers.appendChild(li);
+        }
+        console.log(data["memberlist"]);
     }
 
     if(username != data.user_name){   
@@ -113,6 +128,7 @@ socketio.on('display-client',(data) => {
     div.onclick = handleDeleteFunction;
     container.appendChild(div);
 });
+
 
 // When you want to delete a message
 const handleDeleteFunction = (e) => {
@@ -137,7 +153,7 @@ socketio.on("remove-message",json => {
     var div = document.getElementById(json["id"])
     console.log(div);
     container.removeChild(div);
-})
+});
 
 
 // When you generate new room

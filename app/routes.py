@@ -6,7 +6,7 @@ from app import socketio
 from .models import *
 from app import db
 
-users = {"123456abcderfghi"}
+users = {"testabc"}
 
 @app.route('/',methods=['POST','GET'])
 def session():
@@ -48,6 +48,15 @@ def check_room_handler(json):
         emit('if-room',{'present':True,'user':json['username'],'message_list':list,"members":room.members+1})
 
 
+def from_set_to_list(setofuser):
+    listofuser = []
+    for user in setofuser:
+        if user == "testabc":
+            pass
+        else:
+            listofuser.append(user)
+    return listofuser
+
 @socketio.on('join')
 def join_handler(json):
     print(str(json),"join")
@@ -62,7 +71,6 @@ def join_handler(json):
     else:
         username = json['username']
         roomID = uuid.uuid1().hex
-        #list_of_rooms.append(roomID)
         db.session.add(Room(room_key=roomID,members=1))
         db.session.commit()
         users.add(json['username'])
@@ -71,7 +79,7 @@ def join_handler(json):
         });
     join_room(roomID)
     room = Room.query.filter_by(room_key=roomID).first()
-    emit("display-client",{"user_name":username,"message":"has entered the room","roomcode":roomID,"id":"temp","members":room.members},room=roomID)
+    emit("display-client",{"user_name":username,"message":"has entered the room","roomcode":roomID,"id":"temp","members":room.members,"memberlist":from_set_to_list(users)},room=roomID)
 
 @socketio.on('delete-message')
 def delete_message_handler(json):
@@ -91,6 +99,6 @@ def leave_room_handler(json):
         Room.query.filter_by(room_id=room.room_id).delete()
     db.session.commit()   
     if room.members != 0:
-        emit("display-client",{"user_name":json['username'],"message":"has left the room","members":room.members,"id":"temp"},room=json['room'])
+        emit("display-client",{"user_name":json['username'],"message":"has left the room","members":room.members,"id":"temp","memberlist":from_set_to_list(users)},room=json['room'])
     leave_room(json['room'])
    
