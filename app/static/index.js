@@ -65,6 +65,7 @@ const appendPreviousMessages = (messages) => {
             div.innerHTML = `${messages[i].message} :<strong> ${messages[i].user} </strong>`;
             div.classList.add('mymessages');
         }
+        div.setAttribute("id",messages[i].id.toString());
         div.onclick = handleDeleteFunction;
         container.appendChild(div);
     }
