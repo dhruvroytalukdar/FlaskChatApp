@@ -6,7 +6,7 @@ from app import socketio
 from .models import *
 from app import db
 
-users = {"testabc"}
+users = {"testabc":{"testabc"}}
 
 @app.route('/',methods=['POST','GET'])
 def session():
@@ -40,7 +40,6 @@ def check_room_handler(json):
         emit('if-room',{'present':False,'user':json['username'],'error':'This user already exists.Try another name.'})    
     else:
         print("True")
-        users.add(json['username'])
         room = Room.query.filter_by(room_key=json['room_id']).first()
         list = []
         for messages in Message.query.filter_by(room_id=room.room_id).all():
@@ -67,19 +66,24 @@ def join_handler(json):
         room = db.session.query(Room).filter_by(room_key=roomID).first()
         room.members += 1
         db.session.commit()
+        users[roomID].add(json['username'])
         print('Room :',room)
     else:
         username = json['username']
         roomID = uuid.uuid1().hex
         db.session.add(Room(room_key=roomID,members=1))
         db.session.commit()
-        users.add(json['username'])
-        socketio.emit('add-new-roomcode',{
-            'code':roomID
-        });
+        try:
+            users[roomID].add(username)
+        except KeyError:
+            users[roomID] = {username}
     join_room(roomID)
+    if not ('roomcode' in json.keys()):
+        socketio.emit('add-new-roomcode',{
+            'room':roomID
+        },room=roomID);
     room = Room.query.filter_by(room_key=roomID).first()
-    emit("display-client",{"user_name":username,"message":"has entered the room","roomcode":roomID,"id":"temp","members":room.members,"memberlist":from_set_to_list(users)},room=roomID)
+    emit("display-client",{"user_name":username,"message":"has entered the room","roomcode":roomID,"id":"temp","members":room.members,"memberlist":from_set_to_list(users[roomID])},room=roomID)
 
 @socketio.on('delete-message')
 def delete_message_handler(json):
@@ -93,12 +97,12 @@ def leave_room_handler(json):
     print(str(json),"leave")
     room = db.session.query(Room).filter_by(room_key=json['room']).first()
     room.members -= 1
-    users.remove(json['username'])
+    users[json['room']].remove(json['username'])
     print("Room :",room)
     if room.members == 0:
         Room.query.filter_by(room_id=room.room_id).delete()
     db.session.commit()   
     if room.members != 0:
-        emit("display-client",{"user_name":json['username'],"message":"has left the room","members":room.members,"id":"temp","memberlist":from_set_to_list(users)},room=json['room'])
+        emit("display-client",{"user_name":json['username'],"message":"has left the room","members":room.members,"id":"temp","memberlist":from_set_to_list(users[json['room']])},room=json['room'])
     leave_room(json['room'])
    

@@ -3,10 +3,12 @@ var socketio = io.connect();
 const form = document.getElementById('form');
 var username = undefined;
 var roomcode = undefined;
-const container = document.getElementById('message-container');
+const container = document.querySelector('.chat-container');
 const member_count_id = document.getElementById("member_count_id");
-const listofmembers = document.getElementById('listofmembers');
-
+const listofmembers = document.querySelector('.covermembers');
+const scroll = ()=>{
+    container.scrollTop = container.scrollHeight;
+}
 
 // When you have room code
 form.onsubmit = (e) => {
@@ -44,7 +46,10 @@ form.onsubmit = (e) => {
                 
                 document.getElementById("login-form").classList.add("hide-class");
                 document.getElementById("message-section").classList.remove("hide-class");
-                document.getElementById("greetings").innerHTML = `Welcome ${user} to chat room ${room}!!`;
+                //document.getElementById("greetings").innerHTML = `Welcome ${user} to chat room ${room}!!`;
+                document.querySelector(".greetings").innerHTML = `<p>Welcome to <span>Senderly</span></p>`;
+                document.getElementById('copyroom').value = roomcode;
+                scroll();
             }else{
                 alert(json['error']);
                 document.getElementById("username").value = "";
@@ -62,10 +67,14 @@ const appendPreviousMessages = (messages) => {
         console.log(messages[i].user);
         if(username != messages[i].user){   
             var div = document.createElement('div');
-            div.innerHTML = `<strong> ${messages[i].user} </strong>: ${messages[i].message}`;
+            div.setAttribute("class","messagebubble");
+            //div.innerHTML = `<strong> ${messages[i].user} </strong>: ${messages[i].message}`;
+            div.innerHTML = `<div class="message"><p class="user">${messages[i].user}</p><p class="message-text">${messages[i].message}</p></div><div class="space"></div>`;
         }else{
             var div = document.createElement('div');
-            div.innerHTML = `${messages[i].message} :<strong> ${messages[i].user} </strong>`;
+            div.setAttribute("class","mymessagebubble");
+            //div.innerHTML = `${messages[i].message} :<strong> ${messages[i].user} </strong>`;
+            div.innerHTML = `<div class="message"><p class="user">${messages[i].user}</p><p class="message-text">${messages[i].message}</p></div><div class="space"></div>`;
             div.classList.add('mymessages');
         }
         div.setAttribute("id",messages[i].id.toString());
@@ -89,7 +98,6 @@ message_form.onsubmit = e => {
     });
 }
 
-
 // Recieve message from server
 socketio.on('display-client',(data) => {
     
@@ -98,7 +106,8 @@ socketio.on('display-client',(data) => {
     
     if(roomcode == undefined){
         roomcode = data.roomcode;
-        document.getElementById("greetings").innerHTML = `Welcome ${username} to chat room ${roomcode}!!`;
+        //document.getElementById("greetings").innerHTML = `Welcome ${username} to chat room ${roomcode}!!`;
+        document.querySelector(".greetings").innerHTML = `<p>Welcome to <span>Senderly</span> <input type="text" value="${roomcode}" id="copyroom"></p>`;
     }
     
     // Check if the data has members properties to update members
@@ -109,35 +118,48 @@ socketio.on('display-client',(data) => {
     if(data.hasOwnProperty('memberlist')){
         listofmembers.innerHTML = "";
         for(var i=0;i<data['memberlist'].length;i++){
-            var li = document.createElement("li");
-            li.innerHTML = `<strong>${data["memberlist"][i]}</strong>`;
-            listofmembers.appendChild(li);
+            var div = document.createElement("div");
+            div.setAttribute("class","member");
+            //div.innerHTML = `<strong>${data["memberlist"][i]}</strong>`;
+            div.innerHTML = `<img src="static/user1.jpg"><p>${data['memberlist'][i]}</p>`;
+            listofmembers.appendChild(div);
         }
         console.log(data["memberlist"]);
     }
 
+    var div;
     if(username != data.user_name){   
-        var div = document.createElement('div');
-        div.innerHTML = `<strong> ${data.user_name} </strong>: ${data.message}`;
+        
+        // var div = document.createElement('div');
+        // div.innerHTML = `<strong> ${data.user_name} </strong>: ${data.message}`;
+        
+        div = document.createElement('div');
+        div.setAttribute("class","messagebubble");
+        div.innerHTML = `<div class="message"><p class="user">${data.user_name}</p><p class="message-text">${data.message}</p></div><div class="space"></div>`;
     }else{
-        var div = document.createElement('div');
-        div.innerHTML = `${data.message} :<strong> ${data.user_name} </strong>`;
+        
+        // var div = document.createElement('div');
+        // div.innerHTML = `${data.message} :<strong> ${data.user_name} </strong>`;
+        
+        div = document.createElement('div');
+        div.setAttribute("class","mymessagebubble");
+        div.innerHTML = `<div class="message"><p class="user">${data.user_name}</p><p class="message-text">${data.message}</p></div><div class="space"></div>`;
         div.classList.add('mymessages');
     }
+
     div.setAttribute("id",data.id.toString());
-    div.onclick = handleDeleteFunction;
+    div.addEventListener("click",handleDeleteFunction,true);
     container.appendChild(div);
+    scroll();
 });
 
 
 // When you want to delete a message
 const handleDeleteFunction = (e) => {
-    var parentdiv;
-    if(e.srcElement.parentNode == container)
-        parentdiv = e.srcElement;
-    else
-        parentdiv = e.srcElement.parentNode;
-    console.log(parentdiv);
+    var parentdiv = e.srcElement;
+    while(parentdiv.parentElement != container)
+        parentdiv = parentdiv.parentElement;
+    console.log(parentdiv,e.srcElement);
     if(parentdiv.classList.contains("mymessages") && parentdiv.getAttribute("id") !== "temp"){
         if(confirm("Do you really want to delete your message?")){
             socketio.emit("delete-message",{
@@ -148,7 +170,7 @@ const handleDeleteFunction = (e) => {
     }
 }
 
-// Remove message from he html page
+// Remove message from the html page
 socketio.on("remove-message",json => {
     var div = document.getElementById(json["id"])
     console.log(div);
@@ -168,15 +190,27 @@ document.getElementById('create-room').onclick = () => {
 
         //add new roomid after a room is created by someone 
         socketio.on('add-new-roomcode',(data) => {
-            roomcode = data['room']
+            roomcode = data['room'];
+            console.log(roomcode);
+            document.getElementById('copyroom').value = roomcode;
         });
         
         username = username_input.value;
-        document.getElementById("greetings").innerHTML = `Welcome ${username} to chat room ${roomcode}!!`;
+        //document.getElementById("greetings").innerHTML = `Welcome ${username} to chat room ${roomcode}!!`;
+        document.querySelector(".greetings").innerHTML = `<p>Welcome to <span>Senderly</span></p>`;
         document.getElementById("login-form").classList.add("hide-class");
         document.getElementById("message-section").classList.remove("hide-class");
     }
 };
+
+// copy to clipboard
+document.querySelector(".dummy").addEventListener("click",() => {
+    var inp = document.querySelector("#copyroom");
+    inp.select();
+    document.execCommand("copy");
+    console.log(inp.value);
+});
+
 
 // Leave Room Button
 document.getElementById('leave-room').onclick = () => {
@@ -186,11 +220,18 @@ document.getElementById('leave-room').onclick = () => {
         room:roomcode
     });
 
-    window.location.reload();
+    location.reload();
 
     document.getElementById("login-form").classList.remove("hide-class");
     document.getElementById("message-section").classList.add("hide-class");
     container.innerHTML = "No Messages yet..";
     username = "";
-    roomcode = "";   
+    roomcode = "";
 }
+
+/**********************************/
+const hamburger = document.querySelector(".hamburger");
+hamburger.addEventListener('click', () => {
+    console.log("burger");
+    document.querySelector(".hide-them").classList.toggle("open");
+})
