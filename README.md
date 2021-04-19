@@ -1,4 +1,4 @@
-# Fask Real Time ChatApp
+# Flask Real Time ChatApp
 
 ## Features
 
@@ -14,4 +14,4 @@
 * Flask as a server
 * Flask-SocketIO for server side socketio implementation
 * SocketIO.js for client side socketio implementation
-* Plain HTML,CSS and Vanila Javascript for UI design and client side rendering **(can be upgraded to Vue.js in the future)**
+* Plain HTML,CSS and Vanilla Javascript for UI design and client side rendering **(can be upgraded to Vue.js in the future)**
