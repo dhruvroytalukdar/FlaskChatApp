@@ -15,3 +15,8 @@
 * Flask-SocketIO for server side socketio implementation
 * SocketIO.js for client side socketio implementation
 * Plain HTML,CSS and Vanilla Javascript for UI design and client side rendering **(can be upgraded to Vue.js in the future)**
+
+
+## Here is a Demo
+https://user-images.githubusercontent.com/64345884/115671970-b3004e00-a368-11eb-9c95-acd5a5846d00.mp4
+
