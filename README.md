@@ -1,5 +1,7 @@
 # Flask Real Time ChatApp
 
+**currently it is not deployed because I am facing some issues managing websockets in heroku but it will be up soon**
+
 ## Features
 
 * Provides realtime features of a basic chat app
